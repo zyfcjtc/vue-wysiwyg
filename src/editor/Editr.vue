@@ -35,6 +35,8 @@ import code from "./modules/code.js";
 import list_ordered from "./modules/list_ordered.js";
 import list_unordered from "./modules/list_unordered.js";
 
+import source_code from "./modules/source_code.js";
+
 import image from "./modules/image.vue";
 import table from "./modules/table.vue";
 
@@ -48,7 +50,7 @@ const modules = [
     headings, hyperlink, code,
     list_ordered, list_unordered, separator,
     image, table, separator,
-    removeFormat
+    removeFormat, source_code
 ];
 
 export default {
@@ -74,7 +76,8 @@ export default {
 
     data () {
         return {
-            selection: ""
+            selection: "",
+            showSourceCode: false,
         }
     },
 
@@ -108,7 +111,7 @@ export default {
 
         innerHTML: {
             get () {
-                return this.$refs.content.innerHTML;
+                return this.$refs.content.textContent;
             },
 
             set (html) {
@@ -120,6 +123,19 @@ export default {
     },
 
     methods: {
+        XMLEscape(sValue, bUseApos) {
+            var sval="";
+            for(var idx=0; idx < sValue.length; idx++) {
+                var c = sValue.charAt(idx);
+                if      (c == '<') sval += "&lt;";
+                else if (c == '>') sval += "&gt;";
+                else if (c == '&') sval += "&amp;";
+                else if (c == '"') sval += "&quot;";
+                else if (c == '\'') sval += (bUseApos ? "&apos;" : "&#39;");
+                else sval += c;
+            }
+            return sval;
+        },
         saveSelection() {
             if (window.getSelection !== undefined) {
                 this.selection = window.getSelection();
@@ -191,14 +207,18 @@ export default {
         },
 
         syncHTML () {
-            if (this.html !== this.$refs.content.innerHTML)
+            if (this.html !== this.$refs.content.innerHTML){
                 this.innerHTML = this.html;
+            }  
+                
         }
     },
-
+    
     mounted () {
         this.unwatch = this.$watch("html", this.syncHTML, { immediate: true});
-
+        this.$on('sourcecode',()=>{
+            this.showSourceCode = !this.showSourceCode
+        })
         document.addEventListener("click", this.onDocumentClick);
 
         this.$refs.content.addEventListener("focus", this.onFocus);

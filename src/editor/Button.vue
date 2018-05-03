@@ -25,7 +25,7 @@ export default {
 
 	data () {
 		return {
-			showDashboard: false,
+			showDashboard: false
 		}
 	},
 
@@ -33,7 +33,7 @@ export default {
     uid () {
       return this.$parent._uid
     }
-  },
+	},
 
 	methods: {
 		closeDashboard () {
@@ -50,9 +50,13 @@ export default {
 
 		onBtnClick ($event) {
 			$event.preventDefault();
-			if (this.module.action !== undefined)
+			
+			if (this.module.action !== undefined){
 				this.exec.apply(null, this.module.action);
-
+				if (this.module.action == 'sourceCode') {
+					this.$parent.$emit('sourcecode');			
+				}
+			}
 			else if (this.module.customAction !== undefined) {
 				this.module.customAction(bus.utils).forEach(a => this.exec.apply(null, a));
 			}
